@@ -37,7 +37,7 @@ namespace src.Infra.Redes
                     throw;
                 }
             }
-            catch ()
+            catch (Exception e)
             {
                 
                 throw;

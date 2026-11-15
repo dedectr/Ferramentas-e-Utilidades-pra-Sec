@@ -20,12 +20,9 @@ namespace src.Infra.Http
                 var contexto = await serverHttp.GetContextAsync();
                 var request = contexto.Request;
                 var response = contexto.Response;
-
                 Console.WriteLine($"Recebido: {request.HttpMethod} {request.Url}");
-
                 String responseStringHtml = "<html><body><h1> Olá Mundo </h1></body></html>";
                 byte[] buffer = Encoding.UTF8.GetBytes(responseStringHtml);
-
                 using var output = response.OutputStream;
                 await output.WriteAsync(buffer, 0, buffer.Length);
             }
