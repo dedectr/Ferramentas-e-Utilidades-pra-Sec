@@ -1,5 +1,6 @@
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using src.Interfaces;
 
@@ -7,24 +8,46 @@ namespace src.Infra.Http
 {
     public class ServidorHttp : IHttp
     {
-        public async Task Excute()
+        public async Task<int> Excute()
         {
+            bool runServer = true;
+            String caminhoPath = "../../Pages/index.html";
             String urlServer = "http://127.0.0.1:8909/";
             using var serverHttp = new HttpListener();
             serverHttp.Prefixes.Add(urlServer);
             serverHttp.Start();
             Console.WriteLine($"Servidor rodando em {urlServer}");
-
-            while (true)
+            while (runServer)
             {
                 var contexto = await serverHttp.GetContextAsync();
                 var request = contexto.Request;
                 var response = contexto.Response;
-                Console.WriteLine($"Recebido: {request.HttpMethod} {request.Url}");
-                String responseStringHtml = "<html><body><h1> Olá Mundo </h1></body></html>";
-                byte[] buffer = Encoding.UTF8.GetBytes(responseStringHtml);
-                using var output = response.OutputStream;
-                await output.WriteAsync(buffer, 0, buffer.Length);
+
+                if((request.HttpMethod == "GET") && (request.Url.AbsolutePath == "/joaostack"))
+                {
+                    if(File.Exists(caminhoPath)) return response.StatusCode = (int)HttpStatusCode.NotFound;
+                    try
+                    {
+                        response.ContentType = "text/HTML";
+
+                        string joaoVaiMeDarUmMILHAObeGosto = Path.GetFileName(caminhoPath);
+                        response.AddHeader("Content-Disposition", $"attachment; filename=\"{nomeArquivo}\"");
+                        
+                        using FileStream fs = File.OpenRead(caminhoPath);
+                        response.ContentLength64 = fs.Length;
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                        await fs.CopyToAsync(response.OutputStream);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erro ao enviar arquivo: {ex.Message}");
+                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    }
+
+                }
+                // debug
+                
+
             }
         }
     }

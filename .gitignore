@@ -50,6 +50,7 @@ CodeCoverage/
 BenchmarkDotNet.Artifacts/
 
 src/DowloadesFeitos/
+src/Pages/*
 
 # OS files
 .DS_Store
