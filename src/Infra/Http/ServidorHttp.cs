@@ -8,10 +8,10 @@ namespace src.Infra.Http
 {
     public class ServidorHttp : IHttp
     {
-        public async Task<int> Excute()
+        public async Task Excute()
         {
             bool runServer = true;
-            String caminhoPath = "../../Pages/index.html";
+            String caminhoPath = "./Pages/index.html";
             String urlServer = "http://127.0.0.1:8909/";
             using var serverHttp = new HttpListener();
             serverHttp.Prefixes.Add(urlServer);
@@ -20,18 +20,23 @@ namespace src.Infra.Http
             while (runServer)
             {
                 var contexto = await serverHttp.GetContextAsync();
-                var request = contexto.Request;
-                var response = contexto.Response;
+                HttpListenerRequest request = contexto.Request;
+                HttpListenerResponse response = contexto.Response;
 
-                if((request.HttpMethod == "GET") && (request.Url.AbsolutePath == "/joaostack"))
+                if((request.HttpMethod == HttpMethod.Get.ToString()) && (request.Url.AbsolutePath == "/desligarServer"))
                 {
-                    if(File.Exists(caminhoPath)) return response.StatusCode = (int)HttpStatusCode.NotFound;
+                    runServer = false;
+                    Console.WriteLine("Servidor delisgado");
+                }
+                if((request.HttpMethod == HttpMethod.Get.ToString()) && (request.Url.AbsolutePath == "/joaostack"))
+                {
+                    if(File.Exists(caminhoPath)) response.StatusCode = (int)HttpStatusCode.NotFound;
                     try
                     {
                         response.ContentType = "text/HTML";
 
-                        string joaoVaiMeDarUmMILHAObeGosto = Path.GetFileName(caminhoPath);
-                        response.AddHeader("Content-Disposition", $"attachment; filename=\"{nomeArquivo}\"");
+                        string joaoVaiMeDarUmMILHAObemGosto = Path.GetFileName(caminhoPath);
+                        response.AddHeader("Content-Disposition", $"attachment; filename=\"{joaoVaiMeDarUmMILHAObemGosto}\"");
                         
                         using FileStream fs = File.OpenRead(caminhoPath);
                         response.ContentLength64 = fs.Length;
@@ -43,11 +48,7 @@ namespace src.Infra.Http
                         Console.WriteLine($"Erro ao enviar arquivo: {ex.Message}");
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     }
-
                 }
-                // debug
-                
-
             }
         }
     }
